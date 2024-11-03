@@ -1,3 +1,4 @@
+//For standerdising error handling
 class ApiError extends Error {
     constructor(
         statusCode,
@@ -5,6 +6,7 @@ class ApiError extends Error {
         errors = [],
         stack = ""
     ){
+        //Overwriting the properties of the error class
         super(message)
         this.statusCode = statusCode
         this.data = null
