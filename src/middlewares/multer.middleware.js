@@ -1,3 +1,8 @@
+/*Middleware that works with Express and allows us to easily manage file uploads, 
+including storing files on the server or processing them as needed.
+File upload handling; Storage options; File filtering(to deny certain file types);
+Limitations, error handling
+*/
 import multer from "multer"
 
 const storage = multer.diskStorage({
