@@ -342,6 +342,53 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
     return res.status(200).json(new ApiResponse(200, channel[0], "User channel fetched successfully."))
 })
 
+const getWatchHistory = asyncHandler(async(req, res) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId (req.user._id) //to ensure that the id is correctly formatted as an ObjectId since the user id is not exactly stored as a string
+            }
+        }, 
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory", //adds a field watchHistory as an array, performing an outer join between user and videos collection 
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner", //adds a field owner to the video collection, performing an outer join between video and user collection 
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar:1 
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields:{
+                            owner:{
+                                $first: "$owner"
+                            } 
+                        } 
+                    } //adds owner and video to the watch history
+                ]
+            }
+        }
+    ])
+
+    return res.status(200)
+    .json(new ApiResponse(200, user[0].watchHistory, "Watch history fetched successfully."))
+})
+
 export {
     registerUser, 
     loginUser, 
@@ -352,4 +399,5 @@ export {
     updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile  }
+    getUserChannelProfile,
+    getWatchHistory  }
